@@ -1,0 +1,161 @@
+# ============================================================
+# 8GB LLM Agent — Configuration Profiles
+# Phase 01: Environment Setup
+# ============================================================
+# Usage:
+#   - Lite profile: Fast responses, lower RAM usage (~5GB total)
+#   - Full profile: Best quality, full features (~7-8GB total)
+# Override via CLI: python -m cli.main --profile lite
+# ============================================================
+
+# ── Default Profile ──
+default_profile: full
+
+# ── Named Profiles ──
+profiles:
+  # ── Lite Profile: Speed-first, lower RAM ──
+  lite:
+    name: "Lite"
+    description: "Fast responses with lower RAM usage (~5GB total)"
+    model:
+      path: "models/Phi-3-medium-128k-instruct-Q4_K_M.gguf"
+      source: "microsoft/Phi-3-medium-128k-instruct"
+      size_gb: 2.5
+      n_ctx: 8192
+      n_threads: auto  # auto-detect from CPU
+      n_batch: 512
+      n_gpu_layers: 0  # CPU only
+      rope_scaling_type: 1
+      rope_freq_scale: 0.5
+      chat_format: "chatml"
+    tools:
+      web_search: true
+      web_fetch: true
+      wikipedia: true
+      weather: true
+      system_stats: true
+      code_executor: false  # disabled for speed
+    memory:
+      short_term_turns: 30
+      embedding_model: "nomic-ai/nomic-embed-text-v1.5"
+      auto_summarize_after: 40
+    rag:
+      enabled: true
+      chunk_size: 512
+      top_k: 3
+      hybrid_search: true
+    vision:
+      enabled: false  # disabled in lite mode
+    api:
+      host: "0.0.0.0"
+      port: 11434
+      request_timeout: 60
+      max_concurrent: 1
+
+  # ── Full Profile: Best quality, all features ──
+  full:
+    name: "Full"
+    description: "Maximum quality with all features (~7-8GB total)"
+    model:
+      path: "models/Mistral-7B-v0.3-Q4_K_M.gguf"
+      source: "mistralai/Mistral-7B-v0.3"
+      size_gb: 4.1
+      n_ctx: 32768
+      n_threads: auto
+      n_batch: 512
+      n_gpu_layers: 0
+      rope_scaling_type: 1
+      rope_freq_scale: 0.25
+      chat_format: "mistral"
+    tools:
+      web_search: true
+      web_fetch: true
+      wikipedia: true
+      weather: true
+      system_stats: true
+      code_executor: true
+    memory:
+      short_term_turns: 50
+      embedding_model: "nomic-ai/nomic-embed-text-v1.5"
+      auto_summarize_after: 50
+    rag:
+      enabled: true
+      chunk_size: 1024
+      top_k: 5
+      hybrid_search: true
+    vision:
+      enabled: true
+      model_path: "models/llava-v1.6-mistral-7b-Q4_K_M.gguf"
+      clip_path: "models/mmproj-v1.6-mistral-7b.gguf"
+      image_size: 336
+    api:
+      host: "0.0.0.0"
+      port: 11434
+      request_timeout: 120
+      max_concurrent: 1
+
+  # ── Coding Profile: Optimized for code generation ──
+  coding:
+    name: "Coding"
+    description: "Optimized for code generation and technical tasks"
+    model:
+      path: "models/Qwen2.5-7B-Q4_K_M.gguf"
+      source: "Qwen/Qwen2.5-7B-Instruct"
+      size_gb: 4.5
+      n_ctx: 16384
+      n_threads: auto
+      n_batch: 512
+      n_gpu_layers: 0
+      rope_scaling_type: 1
+      rope_freq_scale: 0.5
+      chat_format: "qwen"
+    tools:
+      web_search: true
+      web_fetch: true
+      wikipedia: false
+      weather: false
+      system_stats: true
+      code_executor: true
+    memory:
+      short_term_turns: 40
+      embedding_model: "nomic-ai/nomic-embed-text-v1.5"
+      auto_summarize_after: 45
+    rag:
+      enabled: true
+      chunk_size: 1024
+      top_k: 5
+      hybrid_search: true
+    vision:
+      enabled: true
+      model_path: "models/llava-v1.6-mistral-7b-Q4_K_M.gguf"
+      clip_path: "models/mmproj-v1.6-mistral-7b.gguf"
+      image_size: 336
+    api:
+      host: "0.0.0.0"
+      port: 11434
+      request_timeout: 120
+      max_concurrent: 1
+
+# ── Logging Configuration ──
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} — {message}"
+  log_file: "logs/agent.log"
+  rotation: "10 MB"
+  retention: "7 days"
+
+# ── RAM Watchdog ──
+watchdog:
+  enabled: true
+  poll_interval: 30  # seconds
+  warn_threshold: 85  # percent
+  critical_threshold: 95  # percent
+
+# ── Paths ──
+paths:
+  models: "models/"
+  logs: "logs/"
+  data: "data/"
+  uploads: "uploads/"
+  qdrant: "data/qdrant/"
+  sessions_db: "data/sessions.db"
